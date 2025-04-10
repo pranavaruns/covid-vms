@@ -1,0 +1,127 @@
+<?php
+session_start();
+error_reporting(0);
+include('includes/dbconnection.php');
+if (strlen($_SESSION['cvmsaid']==0)) {
+  header('location:logout.php');
+  } else{
+    
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Covid Vaccination Management System || Search Vaccination Request</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="../admin/css/bootstrap.min.css" />
+<link rel="stylesheet" href="../admin/css/bootstrap-responsive.min.css" />
+<link rel="stylesheet" href="../admin/css/uniform.css" />
+<link rel="stylesheet" href="../admin/css/select2.css" />
+<link rel="stylesheet" href="../admin/css/maruti-style.css" />
+<link rel="stylesheet" href="../admin/css/maruti-media.css" class="skin-color" />
+</head>
+<body>
+
+<?php include_once('includes/header.php');?>
+<div id="content">
+  <div id="content-header">
+    <div id="breadcrumb"> <a href="dashboard.php" title="Go to Home" class="tip-bottom"><i class="icon-home"></i> Home</a> <a href="search.php" class="current">Search Vaccination Request</a> </div>
+    
+  </div>
+  <div class="container-fluid">
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="widget-box">
+          <div class="widget-title">
+             <span class="icon"><i class="icon-th"></i></span> 
+            <h5>Search Vaccination Request</h5>
+          </div>
+          <div class="widget-content nopadding">
+            <form method="post" class="form-horizontal">
+              
+              <div class="control-group">
+                <label class="control-label">Search(By Booking Number / Name / Mobile No) </label>
+                <div class="controls">
+                 
+                   <input id="searchdata" type="text" name="searchdata" required="true" class="span11" placeholder="Enter Booking Number / Name / Mobile No)">
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-success" name="search" id="submit">Search</button>
+              </div>
+              </div>
+          <div class="widget-content nopadding">
+            <?php
+if(isset($_POST['search']))
+{ 
+
+$sdata=$_POST['searchdata'];
+  ?>
+  <h4 align="center">Result against "<?php echo $sdata;?>" keyword </h4>
+            <table class="table table-bordered data-table" style="font-size: 15px;">
+              <thead>
+                <tr >
+                  <th style="font-size: 15px;">S.No</th>
+                  <th style="font-size: 15px;">Booking Number</th>
+                  <th style="font-size: 15px;">Name</th>
+                  <th style="font-size: 15px;">Mobile Number</th>
+                  <th style="font-size: 15px;">Booking Date</th>
+                  <th style="font-size: 15px;">Status</th>
+                  <th style="font-size: 15px;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php
+$sql="SELECT * from tblvaccinationbooking where (BookingNumber like '%$sdata%' || Name like '%$sdata%' || MobileNumber like '%$sdata%')";
+$query = $dbh -> prepare($sql);
+$query->execute();
+$results=$query->fetchAll(PDO::FETCH_OBJ);
+
+$cnt=1;
+if($query->rowCount() > 0)
+{
+foreach($results as $row)
+{               ?>
+                <tr class="gradeX">
+                  <td><?php echo htmlentities($cnt);?></td>
+                                    <td><?php  echo htmlentities($row->BookingNumber);?></td>
+                                    <td><?php  echo htmlentities($row->Name);?></td>
+                                    <td><?php  echo htmlentities($row->MobileNumber);?></td>
+                                    <td><?php  echo htmlentities($row->DateofBooking);?></td>
+                                     <?php if($row->Status==""){ ?>
+
+                     <td><?php echo "Not Updated Yet"; ?></td>
+<?php } else { ?>                  <td><?php  echo htmlentities($row->Status);?>
+                  </td>
+                  <?php } ?>         
+                                   
+                                    <td><a href="view-vaccination-detail.php?editid=<?php echo htmlentities ($row->ID);?>&&bookid=<?php echo htmlentities ($row->BookingNumber);?>" class="btn btn-primary">View</a></td>
+                </tr><?php 
+$cnt=$cnt+1;
+} } else { ?>
+  <tr>
+    <td colspan="8"> No record found against this search</td>
+
+  </tr>
+  <?php } }?>
+              
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<?php include_once('includes/footer.php');?>
+<script src="../admin/js/jquery.min.js"></script> 
+<script src="../admin/js/jquery.ui.custom.js"></script> 
+<script src="../admin/js/bootstrap.min.js"></script> 
+<script src="../admin/js/jquery.uniform.js"></script> 
+<script src="../admin/js/select2.min.js"></script> 
+<script src="../admin/js/jquery.dataTables.min.js"></script> 
+<script src="../admin/js/maruti.js"></script> 
+<script src="../admin/js/maruti.tables.js"></script>
+</body>
+</html><?php }  ?>
